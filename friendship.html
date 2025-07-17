@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Friendship Tester</title>
+  <style>
+    /* RESET & FONT */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body, html { width:100%; height:100%; overflow:hidden; background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+
+    /* COMMON SCREEN */
+    .screen {
+      position:absolute; top:0; left:0;
+      width:100%; height:100%;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      transition:opacity 0.6s ease;
+      opacity:1; pointer-events:all;
+    }
+    .screen.hide { opacity:0; pointer-events:none; }
+
+    /* DIM OVERLAY */
+    #dimOverlay {
+      position:absolute; top:0; left:0;
+      width:100%; height:100%;
+      background:rgba(0,0,0,0.4);
+      opacity:0; pointer-events:none;
+      transition:opacity 0.6s ease;
+      z-index:5;
+    }
+
+    /* CONFETTI CANVAS */
+    #confetti-canvas {
+      position:absolute; top:0; left:0;
+      width:100%; height:100%;
+      pointer-events:none;
+      z-index:10;
+    }
+
+    /* HISTORY TOGGLE */
+    .history-btn {
+      position:absolute; top:16px; left:16px;
+      width:28px; height:28px;
+      cursor:pointer; fill:#fff;
+      transition:transform 0.3s ease;
+    }
+    .history-btn:hover { transform:rotate(90deg); }
+
+    /* MODE TOGGLE */
+    .mode-btn {
+      position:absolute; top:16px; right:16px;
+      padding:0.4em 0.8em;
+      font-size:0.9em;
+      color:#fff;
+      background:#ff9a6b;
+      border:none; border-radius:6px;
+      cursor:pointer; text-decoration:none;
+      box-shadow:0 4px 8px rgba(0,0,0,0.2);
+      transition:background 0.3s ease, transform 0.3s ease;
+    }
+    .mode-btn:hover {
+      background:#e67e50;
+      transform:scale(1.05);
+    }
+
+    /* INPUT SCREEN */
+    #inputScreen h2 {
+      color:#fff; margin-bottom:1em;
+    }
+    #inputScreen input {
+      padding:0.6em; margin:0.5em 0;
+      width:220px; font-size:1em;
+      border:1px solid #ccc; border-radius:6px;
+    }
+    #inputScreen button {
+      padding:0.6em 1.2em; margin-top:1em;
+      font-size:1em; color:#fff;
+      background:#4fa3ff; border:none;
+      border-radius:6px; cursor:pointer;
+      transition:background 0.3s ease;
+    }
+    #inputScreen button:hover { background:#3288e0; }
+
+    /* RESULT SCREEN */
+    #resultScreen .names {
+      font-size:1.5em; font-weight:bold;
+      margin-bottom:0.5em; color:#fff;
+      text-shadow:1px 1px 2px #555;
+    }
+    #resultScreen h1 {
+      font-size:3em; margin-bottom:0.2em;
+      color:#fff; text-shadow:1px 1px 2px #333;
+    }
+    #messageContainer {
+      display:flex; align-items:center;
+      font-size:1.3em; margin-bottom:1em;
+    }
+    #message { margin-right:0.5em; color:#333; }
+    #resultScreen button {
+      padding:0.6em 1.2em; margin-top:1em;
+      font-size:1em; color:#fff;
+      background:linear-gradient(45deg,#4fa3ff,#a1c4fd);
+      border:2px solid #fff; border-radius:8px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.2);
+      cursor:pointer;
+      transition:transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    #resultScreen button:hover {
+      transform:scale(1.08);
+      box-shadow:0 6px 16px rgba(0,0,0,0.25);
+    }
+
+    /* HISTORY SCREEN */
+    #historyScreen h2 {
+      color:#fff; margin-bottom:0.5em;
+    }
+    #historyList {
+      list-style:none; max-height:300px; overflow-y:auto;
+      width:80%; max-width:320px; padding:0;
+    }
+    #historyList li {
+      background:rgba(255,255,255,0.4);
+      margin-bottom:6px; padding:8px 12px;
+      border-radius:4px; color:#333; font-size:0.95em;
+    }
+  </style>
+</head>
+<body>
+  <div id="dimOverlay"></div>
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- INPUT SCREEN -->
+  <div id="inputScreen" class="screen">
+    <svg class="history-btn" onclick="toggleHistory()" viewBox="0 0 24 24">
+      <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.2-.35 2.33-.95 3.28l1.46 
+               1.46C19.5 15.66 20 13.89 20 12c0-4.42-3.58-8-8-8zm-6.05.72L4.49 
+               3.26C2.5 5.47 2 8.11 2 11c0 4.42 3.58 8 8 8v3l4-4-4-4v3c-3.31 
+               0-6-2.69-6-6 0-1.2.35-2.33.95-3.28z"/>
+    </svg>
+    <a href="index.html" class="mode-btn">Love Mode 💖</a>
+    <h2>Friendship Tester 🤝</h2>
+    <input id="name1" type="text" placeholder="Your name">
+    <input id="name2" type="text" placeholder="Friend’s name">
+    <button onclick="startTest()">Test Your Bond</button>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="resultScreen" class="screen hide">
+    <div class="names" id="namesDisplay"></div>
+    <h1 id="score">0%</h1>
+    <div id="messageContainer">
+      <span id="message">…</span>
+      <span id="iconDisplay">🤝</span>
+    </div>
+    <button onclick="resetTest()">Try Again</button>
+  </div>
+
+  <!-- HISTORY SCREEN -->
+  <div id="historyScreen" class="screen hide">
+    <svg class="history-btn" onclick="toggleHistory()" viewBox="0 0 24 24">
+      <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.2-.35 2.33-.95 
+               3.28l1.46 1.46C19.5 15.66 20 13.89 20 12c0-4.42-3.58-8-8-8zm-6.05.72\
+               L4.49 3.26C2.5 5.47 2 8.11 2 11c0 4.42 3.58 8 8 8v3l4-4-4-4v3c-3.31 \
+               0-6-2.69-6-6 0-1.2.35-2.33.95-3.28z"/>
+    </svg>
+    <h2>History (Last 10)</h2>
+    <ul id="historyList"></ul>
+  </div>
+
+  <!-- SFX FILES -->
+  <audio id="audio-heartbreak" src="sfx-heartbreak.mp3" preload="auto"></audio>
+  <audio id="audio-love" src="sfx-love.mp3" preload="auto"></audio>
+  <audio id="audio-soulmate" src="sfx-soulmate.mp3" preload="auto"></audio>
+
+  <!-- CONFETTI LIB -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+  <script>
+    // Deterministic hash → score
+    function hashCode(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return hash;
+    }
+
+    // Expanded friendship messages
+    const messages = {
+      low: [
+        "We barely talk.",
+        "Awkward pause...",
+        "Needs more chats.",
+        "You're strangers with shared memes.",
+        "Friendship still buffering..."
+      ],
+      mid: [
+        "Friendly buds!",
+        "Could hang out more.",
+        "Building trust.",
+        "Decent vibes.",
+        "Co-op partners in progress."
+      ],
+      high: [
+        "Ride or Die pals",
+        "Best friends forever!",
+        "Platonic greatness!",
+        "Unbreakable bond!",
+        "Your emoji game is flawless together."
+      ]
+    };
+
+    // Load & display history
+    function loadHistory() {
+      const history = JSON.parse(localStorage.getItem('friendHistory') || '[]');
+      const list = document.getElementById('historyList');
+      list.innerHTML = '';
+      history.forEach(entry => {
+        const li = document.createElement('li');
+        li.innerText = `${entry.name1} 🤝 ${entry.name2}: ${entry.score}%`;
+        list.appendChild(li);
+      });
+    }
+
+    // Save to history
+    function updateHistory(entry) {
+      const history = JSON.parse(localStorage.getItem('friendHistory') || '[]');
+      history.unshift(entry);
+      if (history.length > 10) history.pop();
+      localStorage.setItem('friendHistory', JSON.stringify(history));
+    }
+
+    // Toggle Input <-> History screens
+    function toggleHistory() {
+      const inp = document.getElementById('inputScreen'),
+            hist = document.getElementById('historyScreen');
+      if (!hist.classList.contains('hide')) {
+        hist.classList.add('hide');
+        setTimeout(() => inp.classList.remove('hide'), 600);
+      } else {
+        loadHistory();
+        inp.classList.add('hide');
+        setTimeout(() => hist.classList.remove('hide'), 600);
+      }
+    }
+
+    // Main friendship test
+    function startTest() {
+      const raw1 = document.getElementById('name1').value.trim(),
+            raw2 = document.getElementById('name2').value.trim();
+      if (!raw1 || !raw2) return alert('Please enter both names!');
+
+      // Prefix so friendship scores differ from love mode
+      const combined = 'friend:' +
+        [raw1.toLowerCase(), raw2.toLowerCase()].sort().join('');
+      const score = Math.abs(hashCode(combined)) % 101;
+
+      // Determine tier, icon, and SFX
+      let tier, icon, sfx;
+      if (score < 30)       { tier = 'low';  icon = '😶';    sfx = 'audio-heartbreak'; }
+      else if (score <= 70) { tier = 'mid';  icon = '🙂';    sfx = 'audio-love'; }
+      else                  { tier = 'high'; icon = '🤝';    sfx = 'audio-soulmate'; }
+
+      // Pick a random message
+      const pool = messages[tier];
+      const msg = pool[Math.floor(Math.random() * pool.length)];
+
+      // Update UI
+      document.getElementById('namesDisplay').innerText = `${raw1} 🤝 ${raw2}`;
+      document.getElementById('score').innerText       = score + '%';
+      document.getElementById('message').innerText     = msg;
+      document.getElementById('iconDisplay').innerText = icon;
+
+      // Dim overlay on low, confetti on mid/high
+      const overlay = document.getElementById('dimOverlay');
+      if (tier === 'low') {
+        overlay.style.opacity = 1;
+      } else {
+        overlay.style.opacity = 0;
+        confetti({ particleCount: 150, spread: 60, origin: { y: 0.2 } });
+      }
+
+      // Play SFX
+      stopAllSfx();
+      const audio = document.getElementById(sfx);
+      audio.currentTime = 0;
+      audio.play();
+
+      // Save to history
+      updateHistory({ name1: raw1, name2: raw2, score });
+
+      // Transition to result screen
+      document.getElementById('inputScreen').classList.add('hide');
+      setTimeout(() => {
+        document.getElementById('resultScreen').classList.remove('hide');
+      }, 600);
+    }
+
+    // Reset for another test
+    function resetTest() {
+      stopAllSfx();
+      document.getElementById('dimOverlay').style.opacity = 0;
+      document.getElementById('resultScreen').classList.add('hide');
+      setTimeout(() => {
+        document.getElementById('inputScreen').classList.remove('hide');
+        document.getElementById('name1').value = '';
+        document.getElementById('name2').value = '';
+        document.getElementById('name1').focus();
+      }, 600);
+    }
+
+    // Stop all sounds
+    function stopAllSfx() {
+      ['audio-heartbreak','audio-love','audio-soulmate'].forEach(id => {
+        const a = document.getElementById(id);
+        a.pause();
+        a.currentTime = 0;
+      });
+    }
+  </script>
+</body>
+</html>
