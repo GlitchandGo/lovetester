@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hatred Tester</title>
+  <style>
+    /* RESET & FONT */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ff0000 0%, #800080 100%);
+    }
+
+    /* FADE OVERLAY */
+    #fadeOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      opacity: 1;
+      pointer-events: none;
+      z-index: 100;
+      transition: opacity 0.2s ease;
+    }
+
+    /* SCREENS HIDDEN UNTIL BODY.LOADED */
+    .screen {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+    body.loaded .screen {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .screen.hide {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    /* DIM OVERLAY */
+    #dimOverlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+      z-index: 5;
+    }
+
+    /* CONFETTI CANVAS */
+    #confetti-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* HISTORY TOGGLE */
+    .history-btn {
+      position: absolute;
+      top: 16px; left: 16px;
+      width: 28px; height: 28px;
+      cursor: pointer;
+      fill: #fff;
+      transition: transform 0.3s ease;
+      will-change: transform;
+    }
+    .history-btn:hover {
+      transform: rotate(360deg);
+    }
+
+    /* MODE TOGGLE (to Love) */
+    .mode-btn {
+      position: absolute;
+      top: 16px; right: 16px;
+      padding: 0.4em 0.8em;
+      font-size: 0.9em;
+      color: #fff;
+      background: #6b6bff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    .mode-btn:hover {
+      background: #4e4ecb;
+      transform: scale(1.05);
+    }
+
+    /* INPUT SCREEN */
+    #inputScreen h2 {
+      color: #fff;
+      margin-bottom: 1em;
+    }
+    #inputScreen input {
+      padding: 0.6em;
+      margin: 0.5em 0;
+      width: 220px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    #inputScreen button {
+      padding: 0.6em 1.2em;
+      margin-top: 1em;
+      font-size: 1em;
+      color: #fff;
+      background: #ff4e50;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    #inputScreen button:hover {
+      background: #d64541;
+    }
+
+    /* RESULT SCREEN */
+    #resultScreen .names {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-bottom: 0.5em;
+      color: #fff;
+      text-shadow: 1px 1px 2px #333;
+    }
+    #resultScreen h1 {
+      font-size: 3em;
+      margin-bottom: 0.2em;
+      color: #fff;
+      text-shadow: 1px 1px 2px #222;
+    }
+    #messageContainer {
+      display: flex;
+      align-items: center;
+      font-size: 1.3em;
+      margin-bottom: 1em;
+    }
+    #message {
+      margin-right: 0.5em;
+      color: #333;
+    }
+    #resultScreen button {
+      padding: 0.6em 1.2em;
+      margin-top: 1em;
+      font-size: 1em;
+      color: #fff;
+      background: linear-gradient(45deg, #ff4e50, #800080);
+      border: 2px solid #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    #resultScreen button:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    }
+
+    /* HISTORY SCREEN */
+    #historyScreen h2 {
+      color: #fff;
+      margin-bottom: 0.5em;
+    }
+    #historyList {
+      list-style: none;
+      max-height: 300px;
+      overflow-y: auto;
+      width: 80%;
+      max-width: 320px;
+      padding: 0;
+    }
+    #historyList li {
+      background: rgba(255,255,255,0.4);
+      margin-bottom: 6px;
+      padding: 8px 12px;
+      border-radius: 4px;
+      color: #333;
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+<body>
+  <div id="fadeOverlay"></div>
+  <div id="dimOverlay"></div>
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- INPUT SCREEN -->
+  <div id="inputScreen" class="screen">
+    <svg class="history-btn" onclick="toggleHistory()" viewBox="0 0 24 24" width="28" height="28">
+      <path d="M12 5V1L8 5l4 4V6c3.86 0 7 3.14 7 7 0 1.53-.49 2.94-1.31 4.1l1.46 1.46C20.2 16.46
+               21 14.34 21 12c0-4.97-4.03-9-9-9zm-6.36.64L4.18 3.9C2.62 6.03 2 8.46 2 11c0 4.97
+               4.03 9 9 9v3l4-4-4-4v3c-3.86 0-7-3.14-7-7 0-1.53.49-2.94 1.31-4.1z"/>
+    </svg>
+    <button id="toLove" class="mode-btn">Love Mode 💖</button>
+    <h2>Hatred Tester 💢</h2>
+    <input id="name1" type="text" placeholder="Your name">
+    <input id="name2" type="text" placeholder="Their name">
+    <button onclick="startTest()">Unleash the Grudge</button>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="resultScreen" class="screen hide">
+    <div class="names" id="namesDisplay"></div>
+    <h1 id="score">0%</h1>
+    <div id="messageContainer">
+      <span id="message">…</span>
+      <span id="iconDisplay">🕊️</span>
+    </div>
+    <button onclick="resetTest()">Try Again</button>
+  </div>
+
+  <!-- HISTORY SCREEN -->
+  <div id="historyScreen" class="screen hide">
+    <svg class="history-btn" onclick="toggleHistory()" viewBox="0 0 24 24" width="28" height="28">
+      <path d="M12 5V1L8 5l4 4V6c3.86 0 7 3.14 7 7 0 1.53-.49 2.94-1.31 4.1l1.46 1.46C20.2 16.46
+               21 14.34 21 12c0-4.97-4.03-9-9-9zm-6.36.64L4.18 3.9C2.62 6.03 2 8.46 2 11c0 4.97
+               4.03 9 9 9v3l4-4-4-4v3c-3.86 0-7-3.14-7-7 0-1.53.49-2.94 1.31-4.1z"/>
+    </svg>
+    <h2>Feuds You’ve Explored 🔥</h2>
+    <ul id="historyList"></ul>
+  </div>
+
+  <!-- SFX FILES -->
+  <audio id="audio-heartbreak" src="sfx-heartbreak.mp3" preload="auto"></audio>
+  <audio id="audio-love" src="sfx-love.mp3" preload="auto"></audio>
+  <audio id="audio-soulmate" src="sfx-soulmate.mp3" preload="auto"></audio>
+
+  <!-- CONFETTI LIB -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <script>
+    function hashCode(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return hash;
+    }
+
+    const messages = {
+      low: [
+        "No beef detected.",
+        "Peaceful co-op squad.",
+        "Friendship vibes prevail."
+      ],
+      mid: [
+        "Side-eye tension.",
+        "Passive-aggressive roast.",
+        "You spar in jest."
+      ],
+      high: [
+        "Cold war zone.",
+        "Open season on insults.",
+        "Enemies of the frying pan."
+      ]
+    };
+
+    function loadHistory() {
+      const h = JSON.parse(localStorage.getItem('hateHistory') || '[]');
+      const list = document.getElementById('historyList');
+      list.innerHTML = '';
+      h.forEach(e => {
+        const li = document.createElement('li');
+        li.innerText = `${e.name1} 💢 ${e.name2}: ${e.score}%`;
+        list.appendChild(li);
+      });
+    }
+
+    function updateHistory(entry) {
+      const h = JSON.parse(localStorage.getItem('hateHistory') || '[]');
+      h.unshift(entry);
+      if (h.length > 10) h.pop();
+      localStorage.setItem('hateHistory', JSON.stringify(h));
+    }
+
+    function toggleHistory() {
+      const inp = document.getElementById('inputScreen'),
+            hist = document.getElementById('historyScreen');
+      if (!hist.classList.contains('hide')) {
+        hist.classList.add('hide');
+        setTimeout(() => inp.classList.remove('hide'), 600);
+      } else {
+        loadHistory();
+        inp.classList.add('hide');
+        setTimeout(() => hist.classList.remove('hide'), 600);
+      }
+    }
+
+    function startTest() {
+      const n1 = document.getElementById('name1').value.trim(),
+            n2 = document.getElementById('name2').value.trim();
+      if (!n1 || !n2) return alert('Please enter both names!');
+
+      const combined = 'hate:' +
+        [n1.toLowerCase(), n2.toLowerCase()].sort().join('');
+      const score = Math.abs(hashCode(combined)) % 101;
+
+      let tier, icon, sfx;
+      if (score < 30)       { tier='low';  icon='🕊️';    sfx='audio-soulmate'; }
+      else if (score <= 70) { tier='mid';  icon='😒';    sfx='audio-love';     }
+      else                  { tier='high'; icon='💢';    sfx='audio-heartbreak'; }
+
+      const msg = messages[tier][Math.floor(Math.random()*messages[tier].length)];
+
+      document.getElementById('namesDisplay').innerText = `${n1} 💢 ${n2}`;
+      document.getElementById('score').innerText       = score + '%';
+      document.getElementById('message').innerText     = msg;
+      document.getElementById('iconDisplay').innerText = icon;
+
+      const overlay = document.getElementById('dimOverlay');
+      if (tier === 'low') {
+        confetti({ particleCount: 150, spread: 60, origin: { y: 0.2 } });
+        overlay.style.opacity = 0;
+      } else {
+        overlay.style.opacity = 1;
+      }
+
+      stopAllSfx();
+      const audio = document.getElementById(sfx);
+      audio.currentTime = 0;
+      audio.play();
+
+      updateHistory({ name1: n1, name2: n2, score });
+
+      document.getElementById('inputScreen').classList.add('hide');
+      setTimeout(() => {
+        document.getElementById('resultScreen').classList.remove('hide');
+      }, 600);
+    }
+
+    function resetTest() {
+      stopAllSfx();
+      document.getElementById('dimOverlay').style.opacity = 0;
+      document.getElementById('resultScreen').classList.add('hide');
+      setTimeout(() => {
+        const inp = document.getElementById('inputScreen');
+        inp.classList.remove('hide');
+        document.getElementById('name1').value = '';
+        document.getElementById('name2').value = '';
+        document.getElementById('name1').focus();
+      }, 600);
+    }
+
+    function stopAllSfx() {
+      ['audio-heartbreak','audio-love','audio-soulmate'].forEach(id => {
+        const a = document.getElementById(id);
+        a.pause();
+        a.currentTime = 0;
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const overlay = document.getElementById('fadeOverlay');
+      setTimeout(() => { overlay.style.opacity = 0; }, 20);
+      setTimeout(() => { document.body.classList.add('loaded'); }, 220);
+    });
+
+    document.getElementById('toLove').addEventListener('click', () => {
+      const overlay = document.getElementById('fadeOverlay');
+      document.body.classList.remove('loaded');
+      overlay.style.opacity = 1;
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 200);
+    });
+  </script>
+</body>
+</html>
