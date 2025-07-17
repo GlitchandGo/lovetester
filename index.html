@@ -2,144 +2,228 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Love Tester</title>
+  <title>Love Tester 💖</title>
   <style>
     /* RESET & FONT */
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-    body, html { width:100%; height:100%; overflow:hidden; background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); }
-
-    /* COMMON SCREEN */
-    .screen {
-      position:absolute; top:0; left:0;
-      width:100%; height:100%;
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      transition:opacity 0.6s ease;
-      opacity:1; pointer-events:all;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
     }
-    .screen.hide { opacity:0; pointer-events:none; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+    }
 
-    /* DIM OVERLAY */
+    /* FADE OVERLAY (covers on load) */
+    #fadeOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      opacity: 1;
+      pointer-events: none;
+      z-index: 100;
+      transition: opacity 0.2s ease;
+    }
+
+    /* HIDES SCREENS UNTIL BODY.LOADED */
+    .screen {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+    body.loaded .screen {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .screen.hide {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    /* DIM OVERLAY FOR LOW SCORES */
     #dimOverlay {
-      position:absolute; top:0; left:0;
-      width:100%; height:100%;
-      background:rgba(0,0,0,0.5);
-      opacity:0; pointer-events:none;
-      transition:opacity 0.6s ease;
-      z-index:5;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+      z-index: 5;
     }
 
     /* CONFETTI CANVAS */
     #confetti-canvas {
-      position:absolute; top:0; left:0;
-      width:100%; height:100%;
-      pointer-events:none;
-      z-index:10;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 10;
     }
 
-    /* HISTORY TOGGLE (left) */
+    /* HISTORY BUTTON (left) */
     .history-btn {
-      position:absolute; top:16px; left:16px;
-      width:28px; height:28px;
-      cursor:pointer; fill:#fff;
-      transition:transform 0.3s ease;
+      position: absolute;
+      top: 16px; left: 16px;
+      width: 28px; height: 28px;
+      cursor: pointer;
+      fill: #fff;
+      transition: transform 0.3s ease;
+      will-change: transform;
     }
-    .history-btn:hover { transform:rotate(90deg); }
+    .history-btn:hover {
+      transform: rotate(360deg);
+    }
 
-    /* MODE TOGGLE (right) */
+    /* FRIEND MODE BUTTON (right) */
     .mode-btn {
-      position:absolute; top:16px; right:16px;
-      padding:0.4em 0.8em;
-      font-size:0.9em;
-      color:#fff;
-      background:#6b6bff;
-      border:none; border-radius:6px;
-      cursor:pointer; text-decoration:none;
-      box-shadow:0 4px 8px rgba(0,0,0,0.2);
-      transition:background 0.3s ease, transform 0.3s ease;
+      position: absolute;
+      top: 16px; right: 16px;
+      padding: 0.4em 0.8em;
+      font-size: 0.9em;
+      color: #fff;
+      background: #6b6bff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: background 0.3s ease, transform 0.3s ease;
     }
     .mode-btn:hover {
-      background:#4e4ecb;
-      transform:scale(1.05);
+      background: #4e4ecb;
+      transform: scale(1.05);
     }
 
-    /* INPUT SCREEN */
+    /* INPUT SCREEN STYLES */
     #inputScreen h2 {
-      color:#fff; margin-bottom:1em;
+      color: #fff;
+      margin-bottom: 1em;
     }
     #inputScreen input {
-      padding:0.6em; margin:0.5em 0;
-      width:220px; font-size:1em;
-      border:1px solid #ccc; border-radius:6px;
+      padding: 0.6em;
+      margin: 0.5em 0;
+      width: 220px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
     #inputScreen button {
-      padding:0.6em 1.2em; margin-top:1em;
-      font-size:1em; color:#fff;
-      background:#ff6b6b; border:none;
-      border-radius:6px; cursor:pointer;
-      transition:background 0.3s ease;
+      padding: 0.6em 1.2em;
+      margin-top: 1em;
+      font-size: 1em;
+      color: #fff;
+      background: #ff6b6b;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
     }
-    #inputScreen button:hover { background:#e63946; }
+    #inputScreen button:hover {
+      background: #e63946;
+    }
 
-    /* RESULT SCREEN */
+    /* RESULT SCREEN – bigger text */
     #resultScreen .names {
-      font-size:1.5em; font-weight:bold;
-      margin-bottom:0.5em; color:#fff;
-      text-shadow:1px 1px 2px #555;
+      font-size: 2em;
+      font-weight: bold;
+      margin-bottom: 0.5em;
+      color: #fff;
+      text-shadow: 1px 1px 2px #333;
     }
-    #resultScreen h1 {
-      font-size:3em; margin-bottom:0.2em;
-      color:#fff; text-shadow:1px 1px 2px #333;
+    #resultScreen h1#score {
+      font-size: 4.5em;
+      margin-bottom: 0.2em;
+      color: #fff;
+      text-shadow: 1px 1px 2px #222;
     }
     #messageContainer {
-      display:flex; align-items:center;
-      font-size:1.3em; margin-bottom:1em;
+      display: flex;
+      align-items: center;
+      font-size: 1.3em;
+      margin-bottom: 1em;
     }
-    #message { margin-right:0.5em; color:#333; }
+    #message {
+      margin-right: 0.5em;
+      color: #333;
+    }
     #resultScreen button {
-      padding:0.6em 1.2em; margin-top:1em;
-      font-size:1em; color:#fff;
-      background:linear-gradient(45deg,#ff6b6b,#ff9a9e);
-      border:2px solid #fff; border-radius:8px;
-      box-shadow:0 4px 12px rgba(0,0,0,0.2);
-      cursor:pointer;
-      transition:transform 0.3s ease, box-shadow 0.3s ease;
+      padding: 0.6em 1.2em;
+      margin-top: 1em;
+      font-size: 1em;
+      color: #fff;
+      background: linear-gradient(45deg, #ff6b6b, #ff9a9e);
+      border: 2px solid #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     #resultScreen button:hover {
-      transform:scale(1.08);
-      box-shadow:0 6px 16px rgba(0,0,0,0.25);
+      transform: scale(1.08);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
     }
 
     /* HISTORY SCREEN */
     #historyScreen h2 {
-      color:#fff; margin-bottom:0.5em;
+      color: #fff;
+      margin-bottom: 0.5em;
     }
     #historyList {
-      list-style:none; max-height:300px; overflow-y:auto;
-      width:80%; max-width:320px; padding:0;
+      list-style: none;
+      max-height: 300px;
+      overflow-y: auto;
+      width: 80%;
+      max-width: 320px;
+      padding: 0;
     }
     #historyList li {
-      background:rgba(255,255,255,0.4);
-      margin-bottom:6px; padding:8px 12px;
-      border-radius:4px; color:#333; font-size:0.95em;
+      background: rgba(255,255,255,0.4);
+      margin-bottom: 6px;
+      padding: 8px 12px;
+      border-radius: 4px;
+      color: #333;
+      font-size: 0.95em;
+    }
+
+    /* FOOTER */
+    #appFooter {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      font-size: 0.85em;
+      color: rgba(255,255,255,0.7);
+      pointer-events: none;
+      z-index: 20;
     }
   </style>
 </head>
 <body>
-
-  <!-- DIM OVERLAY -->
+  <div id="fadeOverlay"></div>
   <div id="dimOverlay"></div>
-
-  <!-- CONFETTI CANVAS -->
   <canvas id="confetti-canvas"></canvas>
 
   <!-- INPUT SCREEN -->
   <div id="inputScreen" class="screen">
-    <svg class="history-btn" onclick="toggleHistory()" viewBox="0 0 24 24">
-      <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.2-.35 2.33-.95 3.28l1.46 1.46C19.5 15.66 20 13.89 20 12c0-4.42-3.58-8-8-8zm-6.05.72 \
-               L4.49 3.26C2.5 5.47 2 8.11 2 11c0 4.42 3.58 8 8 8v3l4-4-4-4v3c-3.31 0-6-2.69-6-6 0-1.2.35-2.33.95-3.28z"/>
+    <svg class="history-btn" onclick="toggleHistory()" viewBox="0 0 24 24" width="28" height="28">
+      <path d="M12 5V1L8 5l4 4V6c3.86 0 7 3.14 7 7 0 1.53-.49 2.94-1.31 4.1
+               l1.46 1.46C20.2 16.46 21 14.34 21 12c0-4.97-4.03-9-9-9zm-6.36.64
+               L4.18 3.9C2.62 6.03 2 8.46 2 11c0 4.97 4.03 9 9 9v3l4-4-4-4v3
+               c-3.86 0-7-3.14-7-7 0-1.53.49-2.94 1.31-4.1z"/>
     </svg>
-    <a href="friends.html" class="mode-btn">Friends Mode 🤝</a>
+    <button id="toFriends" class="mode-btn">Friends Mode 🤝</button>
     <h2>Love Tester 💖</h2>
     <input id="name1" type="text" placeholder="Your name">
     <input id="name2" type="text" placeholder="Their name">
@@ -159,13 +243,20 @@
 
   <!-- HISTORY SCREEN -->
   <div id="historyScreen" class="screen hide">
-    <svg class="history-btn" onclick="toggleHistory()" viewBox="0 0 24 24">
-      <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.2-.35 2.33-.95 3.28l1.46 1.46C19.5 15.66 20 13.89 20 12c0-4.42-3.58-8-8-8zm-6.05.72 \
-               L4.49 3.26C2.5 5.47 2 8.11 2 11c0 4.42 3.58 8 8 8v3l4-4-4-4v3c-3.31 0-6-2.69-6-6 0-1.2.35-2.33.95-3.28z"/>
+    <svg class="history-btn" onclick="toggleHistory()" viewBox="0 0 24 24" width="28" height="28">
+      <path d="M12 5V1L8 5l4 4V6c3.86 0 7 3.14 7 7 0 1.53-.49 2.94-1.31 4.1
+               l1.46 1.46C20.2 16.46 21 14.34 21 12c0-4.97-4.03-9-9-9zm-6.36.64
+               L4.18 3.9C2.62 6.03 2 8.46 2 11c0 4.97 4.03 9 9 9v3l4-4-4-4v3
+               c-3.86 0-7-3.14-7-7 0-1.53.49-2.94 1.31-4.1z"/>
     </svg>
     <h2>History (Last 10)</h2>
     <ul id="historyList"></ul>
   </div>
+
+  <!-- FOOTER -->
+  <footer id="appFooter">
+    <p id="footerText">Loading footer…</p>
+  </footer>
 
   <!-- SFX FILES -->
   <audio id="audio-heartbreak" src="sfx-heartbreak.mp3" preload="auto"></audio>
@@ -174,8 +265,8 @@
 
   <!-- CONFETTI LIB -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-
   <script>
+    // Deterministic hash → 0–100
     function hashCode(str) {
       let hash = 0;
       for (let i = 0; i < str.length; i++) {
@@ -191,24 +282,70 @@
       high: ["Certified S-tier soulbound duo", "Cosmic match!", "A love for the ages!"]
     };
 
+    // Footer messages (sarcastic) + secret
+    const loveFooters = [
+      "Oh great, another triumph of code over common sense. 🙄",
+      "Surprise: The algorithm still doesn’t know your ex. 🤷‍♂️",
+      "Love? More like programmed delusion. 🤖",
+      "Big whoop, 100%. Next. 🚀",
+      "If only this score paid the rent. 💡",
+      "Cupid called, he wants his logic back. 💔",
+      "Data says you're adorable... says who? 📊",
+      "Love in the time of debugging. 🐞",
+      "Swoon away, your browser approves. 🖥️",
+      "Feel the fake love flowing. 🧪",
+      "High score achieved in delusion. 🏆",
+      "Ignore your heart, trust the code. 💾",
+      "Romance: now loading… nevermind. ⏳",
+      "Because love is just a number, right? 🔢",
+      "Your heart and this code are equally reliable. 💖",
+      "No refunds if you get ghosted. 👻",
+      "Validated by an impartial algorithm. 🤨",
+      "Better than therapy? Don't bet on it. 🛋️",
+      "Congratulations on your digital fling. 💻",
+      "Next update: real-life romance support. 📦",
+      "Algorithmic affection: slightly less awkward. 🥸",
+      "Satisfaction not guaranteed. ⚠️",
+      "At least the code trusts you. 🤝",
+      "Date responsibly. Or not. 🥂",
+      "Beep boop—romance detected. 📳",
+      "System recommends pizza instead. 🍕",
+      "Offline compatibility: unknown. 📵",
+      "Debug your love life later. 🐛",
+      "Emotional firmware: needs update. 🛠️",
+      "Please hold while we manufacture feelings. 🏭"
+    ];
+    const secretFooters = [
+      "If you see this, your crush is now your soulmate. 💌",
+      "This is your sign. Send the message. ✉️",
+      "Unicorn victory: rare occurrence. 🦄"
+    ];
+
+    function pickFooter() {
+      const chance = Math.random();
+      if (chance < 0.005) {
+        return secretFooters[Math.floor(Math.random() * secretFooters.length)];
+      }
+      return loveFooters[Math.floor(Math.random() * loveFooters.length)];
+    }
+
+    // History
     function loadHistory() {
-      const h = JSON.parse(localStorage.getItem('loveHistory') || '[]');
+      const hist = JSON.parse(localStorage.getItem('loveHistory') || '[]');
       const list = document.getElementById('historyList');
       list.innerHTML = '';
-      h.forEach(e => {
+      hist.forEach(e => {
         const li = document.createElement('li');
         li.innerText = `${e.name1} ❤️ ${e.name2}: ${e.score}%`;
         list.appendChild(li);
       });
     }
-
-    function updateHistory(entry) {
-      const h = JSON.parse(localStorage.getItem('loveHistory') || '[]');
-      h.unshift(entry);
-      if (h.length > 10) h.pop();
-      localStorage.setItem('loveHistory', JSON.stringify(h));
+    function updateHistory(e) {
+      const hist = JSON.parse(localStorage.getItem('loveHistory') || '[]');
+      hist.unshift(e);
+      if (hist.length > 10) hist.pop();
+      localStorage.setItem('loveHistory', JSON.stringify(hist));
     }
-
     function toggleHistory() {
       const inp = document.getElementById('inputScreen'),
             hist = document.getElementById('historyScreen');
@@ -222,60 +359,51 @@
       }
     }
 
+    // Main test
     function startTest() {
       const raw1 = document.getElementById('name1').value.trim(),
             raw2 = document.getElementById('name2').value.trim();
       if (!raw1 || !raw2) return alert('Please enter both names!');
-
-      const combined = [raw1.toLowerCase(), raw2.toLowerCase()].sort().join(''),
+      const combined = [raw1, raw2].map(s=>s.toLowerCase()).sort().join(''),
             score    = Math.abs(hashCode(combined)) % 101;
-
       let tier, icon, sfx;
       if (score < 30)       { tier='low';  icon='💔';    sfx='audio-heartbreak'; }
-      else if (score <= 70) { tier='mid';  icon='❤️‍🩹'; sfx='audio-love'; }
+      else if (score <= 70) { tier='mid';  icon='❤️‍🩹'; sfx='audio-love';      }
       else                  { tier='high'; icon='💖';    sfx='audio-soulmate'; }
-
       const msg = messages[tier][Math.floor(Math.random()*messages[tier].length)];
-
       document.getElementById('namesDisplay').innerText = `${raw1} ❤️ ${raw2}`;
       document.getElementById('score').innerText       = score + '%';
       document.getElementById('message').innerText     = msg;
       document.getElementById('iconDisplay').innerText = icon;
-
-      // dim or confetti
-      const overlay = document.getElementById('dimOverlay');
-      if (tier === 'low') overlay.style.opacity = 1;
-      else {
-        overlay.style.opacity = 0;
+      const dim = document.getElementById('dimOverlay');
+      if (tier === 'low') {
         confetti({ particleCount: 150, spread: 60, origin: { y: 0.2 } });
+        dim.style.opacity = 0;
+      } else {
+        dim.style.opacity = 1;
       }
-
-      // play sound
       stopAllSfx();
       const audio = document.getElementById(sfx);
       audio.currentTime = 0;
       audio.play();
-
       updateHistory({ name1: raw1, name2: raw2, score });
-
       document.getElementById('inputScreen').classList.add('hide');
       setTimeout(() => {
         document.getElementById('resultScreen').classList.remove('hide');
       }, 600);
     }
-
     function resetTest() {
       stopAllSfx();
       document.getElementById('dimOverlay').style.opacity = 0;
       document.getElementById('resultScreen').classList.add('hide');
       setTimeout(() => {
-        document.getElementById('inputScreen').classList.remove('hide');
+        const inp = document.getElementById('inputScreen');
+        inp.classList.remove('hide');
         document.getElementById('name1').value = '';
         document.getElementById('name2').value = '';
         document.getElementById('name1').focus();
       }, 600);
     }
-
     function stopAllSfx() {
       ['audio-heartbreak','audio-love','audio-soulmate'].forEach(id => {
         const a = document.getElementById(id);
@@ -283,6 +411,24 @@
         a.currentTime = 0;
       });
     }
+
+    // INITIALIZE
+    window.addEventListener('DOMContentLoaded', () => {
+      const overlay = document.getElementById('fadeOverlay');
+      setTimeout(() => { overlay.style.opacity = 0; }, 20);
+      setTimeout(() => { document.body.classList.add('loaded'); }, 220);
+      document.getElementById('footerText').innerText = pickFooter();
+    });
+
+    // NAVIGATE TO FRIENDS
+    document.getElementById('toFriends').addEventListener('click', () => {
+      const overlay = document.getElementById('fadeOverlay');
+      document.body.classList.remove('loaded');
+      overlay.style.opacity = 1;
+      setTimeout(() => {
+        window.location.href = 'friends.html';
+      }, 200);
+    });
   </script>
 </body>
 </html>
