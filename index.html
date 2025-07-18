@@ -18,7 +18,7 @@
       background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
     }
 
-    /* FADE OVERLAY (covers on load) */
+    /* FADE OVERLAY */
     #fadeOverlay {
       position: fixed;
       top: 0; left: 0;
@@ -30,7 +30,7 @@
       transition: opacity 0.2s ease;
     }
 
-    /* HIDES SCREENS UNTIL BODY.LOADED */
+    /* SCREENS */
     .screen {
       position: absolute;
       top: 0; left: 0;
@@ -106,7 +106,7 @@
       transform: scale(1.05);
     }
 
-    /* INPUT SCREEN STYLES */
+    /* INPUT SCREEN */
     #inputScreen h2 {
       color: #fff;
       margin-bottom: 1em;
@@ -218,9 +218,9 @@
   <!-- INPUT SCREEN -->
   <div id="inputScreen" class="screen">
     <svg class="history-btn" onclick="toggleHistory()" viewBox="0 0 24 24" width="28" height="28">
-      <path d="M12 5V1L8 5l4 4V6c3.86 0 7 3.14 7 7 0 1.53-.49 2.94-1.31 4.1
-               l1.46 1.46C20.2 16.46 21 14.34 21 12c0-4.97-4.03-9-9-9zm-6.36.64
-               L4.18 3.9C2.62 6.03 2 8.46 2 11c0 4.97 4.03 9 9 9v3l4-4-4-4v3
+      <path d="M12 5V1L8 5l4 4V6c3.86 0 7 3.14 7 7 0 1.53-.49 2.94-1.31 4.1l1.46 1.46
+               C20.2 16.46 21 14.34 21 12c0-4.97-4.03-9-9-9zm-6.36.64L4.18 3.9
+               C2.62 6.03 2 8.46 2 11c0 4.97 4.03 9 9 9v3l4-4-4-4v3
                c-3.86 0-7-3.14-7-7 0-1.53.49-2.94 1.31-4.1z"/>
     </svg>
     <button id="toFriends" class="mode-btn">Friends Mode 🤝</button>
@@ -244,9 +244,9 @@
   <!-- HISTORY SCREEN -->
   <div id="historyScreen" class="screen hide">
     <svg class="history-btn" onclick="toggleHistory()" viewBox="0 0 24 24" width="28" height="28">
-      <path d="M12 5V1L8 5l4 4V6c3.86 0 7 3.14 7 7 0 1.53-.49 2.94-1.31 4.1
-               l1.46 1.46C20.2 16.46 21 14.34 21 12c0-4.97-4.03-9-9-9zm-6.36.64
-               L4.18 3.9C2.62 6.03 2 8.46 2 11c0 4.97 4.03 9 9 9v3l4-4-4-4v3
+      <path d="M12 5V1L8 5l4 4V6c3.86 0 7 3.14 7 7 0 1.53-.49 2.94-1.31 4.1l1.46 1.46
+               C20.2 16.46 21 14.34 21 12c0-4.97-4.03-9-9-9zm-6.36.64L4.18 3.9
+               C2.62 6.03 2 8.46 2 11c0 4.97 4.03 9 9 9v3l4-4-4-4v3
                c-3.86 0-7-3.14-7-7 0-1.53.49-2.94 1.31-4.1z"/>
     </svg>
     <h2>History (Last 10)</h2>
@@ -260,29 +260,48 @@
 
   <!-- SFX FILES -->
   <audio id="audio-heartbreak" src="heartbreak.mp3" preload="auto"></audio>
-  <audio id="audio-love" src="love.mp3" preload="auto"></audio>
-  <audio id="audio-soulmate" src="soulmate.mp3" preload="auto"></audio>
+  <audio id="audio-mid"       src="mid.mp3"       preload="auto"></audio>
+  <audio id="audio-cheer"     src="cheer.mp3"     preload="auto"></audio>
+  <audio id="audio-soulmate"  src="soulmate.mp3"  preload="auto"></audio>
 
   <!-- CONFETTI LIB -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <script>
-    // Deterministic hash → 0–100
+    // Hash → 0–100
     function hashCode(str) {
       let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      for (let c of str) {
+        hash = ((hash << 5) - hash) + c.charCodeAt(0);
         hash |= 0;
       }
       return hash;
     }
 
+    // Messages for four tiers
     const messages = {
-      low: ["It's complicated.", "Better as friends.", "Ouch, that's low."],
-      mid: ["Love is blossoming!", "There's something there!", "Could go either way."],
-      high: ["Certified S-tier soulbound duo", "Cosmic match!", "A love for the ages!"]
+      low: [
+        "It's complicated.",
+        "Better as friends.",
+        "Ouch, that's low."
+      ],
+      mid: [
+        "Love is blossoming!",
+        "There's something there!",
+        "Could go either way."
+      ],
+      cheer: [
+        "Getting warmer! 🎈",
+        "Sparkling love vibes! ✨",
+        "Pretty okay, not bad! 👍"
+      ],
+      high: [
+        "Certified S-tier soulbound duo",
+        "Cosmic match!",
+        "A love for the ages!"
+      ]
     };
 
-    // Footer messages (sarcastic) + secret
+    // Sarcastic footers + secret
     const loveFooters = [
       "Oh great, another triumph of code over common sense. 🙄",
       "Surprise: The algorithm still doesn’t know your ex. 🤷‍♂️",
@@ -322,27 +341,26 @@
     ];
 
     function pickFooter() {
-      const chance = Math.random();
-      if (chance < 0.005) {
+      const r = Math.random();
+      if (r < 0.005) {
         return secretFooters[Math.floor(Math.random() * secretFooters.length)];
       }
       return loveFooters[Math.floor(Math.random() * loveFooters.length)];
     }
 
-    // History
     function loadHistory() {
       const hist = JSON.parse(localStorage.getItem('loveHistory') || '[]');
-      const list = document.getElementById('historyList');
-      list.innerHTML = '';
+      const ul = document.getElementById('historyList');
+      ul.innerHTML = '';
       hist.forEach(e => {
         const li = document.createElement('li');
         li.innerText = `${e.name1} ❤️ ${e.name2}: ${e.score}%`;
-        list.appendChild(li);
+        ul.appendChild(li);
       });
     }
-    function updateHistory(e) {
+    function updateHistory(entry) {
       const hist = JSON.parse(localStorage.getItem('loveHistory') || '[]');
-      hist.unshift(e);
+      hist.unshift(entry);
       if (hist.length > 10) hist.pop();
       localStorage.setItem('loveHistory', JSON.stringify(hist));
     }
@@ -359,39 +377,46 @@
       }
     }
 
-    // Main test
     function startTest() {
-      const raw1 = document.getElementById('name1').value.trim(),
-            raw2 = document.getElementById('name2').value.trim();
-      if (!raw1 || !raw2) return alert('Please enter both names!');
-      const combined = [raw1, raw2].map(s=>s.toLowerCase()).sort().join(''),
+      const n1 = document.getElementById('name1').value.trim(),
+            n2 = document.getElementById('name2').value.trim();
+      if (!n1 || !n2) return alert('Please enter both names!');
+
+      const combined = [n1.toLowerCase(), n2.toLowerCase()].sort().join(''),
             score    = Math.abs(hashCode(combined)) % 101;
+
       let tier, icon, sfx;
-      if (score < 30)       { tier='low';  icon='💔';    sfx='audio-heartbreak'; }
-      else if (score <= 70) { tier='mid';  icon='❤️‍🩹'; sfx='audio-love';      }
-      else                  { tier='high'; icon='💖';    sfx='audio-soulmate'; }
+      if (score <= 33)       { tier='low';   icon='💔';  sfx='audio-heartbreak'; }
+      else if (score <= 67)  { tier='mid';   icon='❤️‍🩹'; sfx='audio-mid';       }
+      else if (score <= 82)  { tier='cheer'; icon='🎉';   sfx='audio-cheer';     }
+      else                   { tier='high';  icon='💖';   sfx='audio-soulmate';  }
+
       const msg = messages[tier][Math.floor(Math.random()*messages[tier].length)];
-      document.getElementById('namesDisplay').innerText = `${raw1} ❤️ ${raw2}`;
+      document.getElementById('namesDisplay').innerText = `${n1} ❤️ ${n2}`;
       document.getElementById('score').innerText       = score + '%';
       document.getElementById('message').innerText     = msg;
       document.getElementById('iconDisplay').innerText = icon;
+
       const dim = document.getElementById('dimOverlay');
-      if (tier === 'low') {
+      if (score >= 50) {
         confetti({ particleCount: 150, spread: 60, origin: { y: 0.2 } });
         dim.style.opacity = 0;
       } else {
         dim.style.opacity = 1;
       }
+
       stopAllSfx();
       const audio = document.getElementById(sfx);
       audio.currentTime = 0;
       audio.play();
-      updateHistory({ name1: raw1, name2: raw2, score });
+
+      updateHistory({ name1: n1, name2: n2, score });
       document.getElementById('inputScreen').classList.add('hide');
       setTimeout(() => {
         document.getElementById('resultScreen').classList.remove('hide');
       }, 600);
     }
+
     function resetTest() {
       stopAllSfx();
       document.getElementById('dimOverlay').style.opacity = 0;
@@ -404,8 +429,9 @@
         document.getElementById('name1').focus();
       }, 600);
     }
+
     function stopAllSfx() {
-      ['audio-heartbreak','audio-love','audio-soulmate'].forEach(id => {
+      ['audio-heartbreak','audio-mid','audio-cheer','audio-soulmate'].forEach(id => {
         const a = document.getElementById(id);
         a.pause();
         a.currentTime = 0;
@@ -420,7 +446,7 @@
       document.getElementById('footerText').innerText = pickFooter();
     });
 
-    // NAVIGATE TO FRIENDS
+    // NAVIGATE TO FRIENDS MODE
     document.getElementById('toFriends').addEventListener('click', () => {
       const overlay = document.getElementById('fadeOverlay');
       document.body.classList.remove('loaded');
