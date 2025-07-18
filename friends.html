@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Friendship Tester</title>
+  <title>Friendship Tester 🤝</title>
   <style>
     /* RESET & FONT */
     * {
@@ -11,7 +11,7 @@
       padding: 0;
       font-family: 'Segoe UI', sans-serif;
     }
-    body, html {
+    html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
@@ -30,7 +30,7 @@
       transition: opacity 0.2s ease;
     }
 
-    /* SCREENS HIDDEN UNTIL BODY.LOADED */
+    /* SCREENS */
     .screen {
       position: absolute;
       top: 0; left: 0;
@@ -52,7 +52,7 @@
       pointer-events: none !important;
     }
 
-    /* DIM OVERLAY */
+    /* DIM OVERLAY FOR LOW SCORES */
     #dimOverlay {
       position: absolute;
       top: 0; left: 0;
@@ -73,7 +73,7 @@
       z-index: 10;
     }
 
-    /* HISTORY TOGGLE (left) */
+    /* HISTORY BUTTON (left) */
     .history-btn {
       position: absolute;
       top: 16px; left: 16px;
@@ -81,12 +81,13 @@
       cursor: pointer;
       fill: #fff;
       transition: transform 0.3s ease;
+      will-change: transform;
     }
     .history-btn:hover {
-      transform: rotate(90deg);
+      transform: rotate(360deg);
     }
 
-    /* HATRED MODE TOGGLE (right) */
+    /* HATRED MODE BUTTON (right) */
     .mode-btn {
       position: absolute;
       top: 16px; right: 16px;
@@ -141,7 +142,7 @@
       color: #fff;
       text-shadow: 1px 1px 2px #555;
     }
-    #resultScreen h1 {
+    #resultScreen h1#score {
       font-size: 3em;
       margin-bottom: 0.2em;
       color: #fff;
@@ -162,7 +163,7 @@
       margin-top: 1em;
       font-size: 1em;
       color: #fff;
-      background: linear-gradient(45deg,#4fa3ff,#a1c4fd);
+      background: linear-gradient(45deg, #4fa3ff, #a1c4fd);
       border: 2px solid #fff;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -195,6 +196,18 @@
       color: #333;
       font-size: 0.95em;
     }
+
+    /* FOOTER */
+    #appFooter {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      font-size: 0.85em;
+      color: rgba(255,255,255,0.7);
+      pointer-events: none;
+      z-index: 20;
+    }
   </style>
 </head>
 <body>
@@ -205,9 +218,10 @@
   <!-- INPUT SCREEN -->
   <div id="inputScreen" class="screen">
     <svg class="history-btn" onclick="toggleHistory()" viewBox="0 0 24 24" width="28" height="28">
-      <path d="M12 5V1L8 5l4 4V6c3.86 0 7 3.14 7 7 0 1.53-.49 2.94-1.31 4.1l1.46 1.46C20.2 16.46
-               21 14.34 21 12c0-4.97-4.03-9-9-9zm-6.36.64L4.18 3.9C2.62 6.03 2 8.46 2 11c0 4.97
-               4.03 9 9 9v3l4-4-4-4v3c-3.86 0-7-3.14-7-7 0-1.53.49-2.94 1.31-4.1z"/>
+      <path d="M12 5V1L8 5l4 4V6c3.86 0 7 3.14 7 7 0 1.53-.49 2.94-1.31 4.1l1.46 1.46
+               C20.2 16.46 21 14.34 21 12c0-4.97-4.03-9-9-9zm-6.36.64L4.18 3.9
+               C2.62 6.03 2 8.46 2 11c0 4.97 4.03 9 9 9v3l4-4-4-4v3
+               c-3.86 0-7-3.14-7-7 0-1.53.49-2.94 1.31-4.1z"/>
     </svg>
     <button id="toHatred" class="mode-btn">Hatred Mode 💢</button>
     <h2>Friendship Tester 🤝</h2>
@@ -230,23 +244,30 @@
   <!-- HISTORY SCREEN -->
   <div id="historyScreen" class="screen hide">
     <svg class="history-btn" onclick="toggleHistory()" viewBox="0 0 24 24" width="28" height="28">
-      <path d="M12 5V1L8 5l4 4V6c3.86 0 7 3.14 7 7 0 1.53-.49 2.94-1.31 4.1l1.46 1.46C20.2 16.46
-               21 14.34 21 12c0-4.97-4.03-9-9-9zm-6.36.64L4.18 3.9C2.62 6.03 2 8.46 2 11c0 4.97
+      <path d="M12 5V1L8 5l4 4V6c3.86 0 7 3.14 7 7 0 1.53-.49 2.94-1.31 4.1l1.46 1.46
+               C20.2 16.46 21 14.34 21 12c0-4.97-4.03-9-9-9zm-6.36.64L4.18 3.9
+               C2.62 6.03 2 8.46 2 11c0 4.97 
                4.03 9 9 9v3l4-4-4-4v3c-3.86 0-7-3.14-7-7 0-1.53.49-2.94 1.31-4.1z"/>
     </svg>
-    <h2>History (Last 10)</h2>
+    <h2>Feuds You’ve Explored 🔥</h2>
     <ul id="historyList"></ul>
   </div>
 
+  <!-- FOOTER -->
+  <footer id="appFooter">
+    <p id="footerText">Loading footer…</p>
+  </footer>
+
   <!-- SFX FILES -->
-  <audio id="audio-heartbreak" src="heartbreak.mp3" preload="auto"></audio>
-  <audio id="audio-love" src="love.mp3" preload="auto"></audio>
-  <audio id="audio-soulmate" src="soulmate.mp3" preload="auto"></audio>
+  <audio id="audio-hellnaw" src="hellnaw.mp3" preload="auto"></audio>
+  <audio id="audio-wtf"     src="wtf.mp3"     preload="auto"></audio>
+  <audio id="audio-yippee"  src="yippee.mp3"  preload="auto"></audio>
+  <audio id="audio-bestfriends" src="bestfriends.mp3" preload="auto"></audio>
 
   <!-- CONFETTI LIB -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <script>
-    // Hash → 0–100 score
+    // Deterministic hash → 0–100
     function hashCode(str) {
       let hash = 0;
       for (let i = 0; i < str.length; i++) {
@@ -281,24 +302,81 @@
       ]
     };
 
+    // Chaotic footer pool + secret
+    const friendFooters = [
+      "They’re your friend until game night ruins everything. 🎲",
+      "Bond forged through mutual hatred of Mondays. ☕",
+      "Inside jokes: 99% reused, 1% actual creativity. 🤡",
+      "Partner in crime? More like partner in napping. 😴",
+      "Spoke more in memes than words. 📱",
+      "Best friends, worst decisions. 🤷‍♀️",
+      "You finish each other's... eternal bafflement. 🤔",
+      "Chill vibes? More like passive-aggressive pings. 📩",
+      "Friendship medal: slightly tarnished. 🏅",
+      "Your group chat history is longer than your text history. 💬",
+      "Shared snacks counted as emotional support. 🍿",
+      "Your connection is as stable as dial-up. 📞",
+      "BFF or just B sort-of-F? The world may never know. 🌍",
+      "Friends by choice, annoyances by default. 😒",
+      "You guys have a Wi-Fi-strength bond. 📶",
+      "Ghosted? More like seen and ignored. 👻",
+      "High-five tolerance: moderate. 🖐️",
+      "Your friendship runs on caffeine and chaos. ☕️",
+      "Ignored each other's texts less than average. 📉",
+      "Shared an umbrella once; still unforgettable. ☔",
+      "Compatibility: conditional acceptance. ✔️",
+      "Certified by your mutual archenemy. 🥊",
+      "Friends? Sure. Rescuers? Eh. 🤦",
+      "You both laugh, then question why. 😂",
+      "Your dog likes them more than you do. 🐶",
+      "Group project survivors—emphasis on 'project'. 📚",
+      "Together you could build a company... and break it too. 🏢",
+      "Synchronized eye-rolls achieved. 🙄",
+      "Friendship score: handle with care. ⚠️",
+      "May your memes never go stale. 🥪",
+      "Bond certified by 2 random strangers. 🤝",
+      "You share Wi-Fi. Congrats, you're best friends. 🌐",
+      "Your history: 50% nostalgia, 50% regret. 🕰️",
+      "Test result: acceptable irritant. 🥴",
+      "Shared life's bloopers reel. 🎬",
+      "Your aura emits slight static. 🔌",
+      "Tolerated each other's puns. 🃏",
+      "Peak friendship: answered a call without screen name. 📲",
+      "You two: OTP in group texts. 👯",
+      "Rare synergy: unlocking level 'adulting'. 🏆",
+      "No refunds if they borrow your stuff. 🛠️"
+    ];
+    const secretFooters = [
+      "If you see this, your friendship was written in the stars. ✨",
+      "You're the type of duo that breaks group chats (in a good way). 💬",
+      "This result just triggered cosmic co-op mode. 🌌"
+    ];
+
+    function pickFooter() {
+      const r = Math.random();
+      if (r < 0.005) {
+        return secretFooters[Math.floor(Math.random() * secretFooters.length)];
+      }
+      return friendFooters[Math.floor(Math.random() * friendFooters.length)];
+    }
+
+    // History handlers
     function loadHistory() {
-      const history = JSON.parse(localStorage.getItem('friendHistory') || '[]');
-      const list = document.getElementById('historyList');
-      list.innerHTML = '';
-      history.forEach(e => {
+      const hist = JSON.parse(localStorage.getItem('friendHistory') || '[]');
+      const ul = document.getElementById('historyList');
+      ul.innerHTML = '';
+      hist.forEach(e => {
         const li = document.createElement('li');
         li.innerText = `${e.name1} 🤝 ${e.name2}: ${e.score}%`;
-        list.appendChild(li);
+        ul.appendChild(li);
       });
     }
-
     function updateHistory(entry) {
-      const history = JSON.parse(localStorage.getItem('friendHistory') || '[]');
-      history.unshift(entry);
-      if (history.length > 10) history.pop();
-      localStorage.setItem('friendHistory', JSON.stringify(history));
+      const hist = JSON.parse(localStorage.getItem('friendHistory') || '[]');
+      hist.unshift(entry);
+      if (hist.length > 10) hist.pop();
+      localStorage.setItem('friendHistory', JSON.stringify(hist));
     }
-
     function toggleHistory() {
       const inp = document.getElementById('inputScreen'),
             hist = document.getElementById('historyScreen');
@@ -312,33 +390,36 @@
       }
     }
 
+    // Main test logic
     function startTest() {
       const n1 = document.getElementById('name1').value.trim(),
             n2 = document.getElementById('name2').value.trim();
       if (!n1 || !n2) return alert('Please enter both names!');
 
-      const combined = 'friend:' +
-        [n1.toLowerCase(), n2.toLowerCase()].sort().join('');
-      const score = Math.abs(hashCode(combined)) % 101;
+      const combined = [n1.toLowerCase(), n2.toLowerCase()].sort().join(''),
+            score    = Math.abs(hashCode(combined)) % 101;
 
       let tier, icon, sfx;
-      if (score < 30)       { tier='low';  icon='😶';    sfx='audio-heartbreak'; }
-      else if (score <= 70) { tier='mid';  icon='🙂';    sfx='audio-love';      }
-      else                  { tier='high'; icon='🤝';    sfx='audio-soulmate'; }
+      if (score <= 33)      { tier='low';   icon='😬'; sfx='audio-hellnaw';     }
+      else if (score <= 67) { tier='mid';   icon='😑'; sfx='audio-wtf';         }
+      else if (score <= 82) { tier='cheer'; icon='😊'; sfx='audio-yippee';      }
+      else                  { tier='high';  icon='🫶'; sfx='audio-bestfriends'; }
 
-      const msg = messages[tier][Math.floor(Math.random()*messages[tier].length)];
+      const msg = messages[tier] 
+        ? messages[tier][Math.floor(Math.random()*messages[tier].length)]
+        : messages.high[Math.floor(Math.random()*messages.high.length)];
 
       document.getElementById('namesDisplay').innerText = `${n1} 🤝 ${n2}`;
       document.getElementById('score').innerText       = score + '%';
       document.getElementById('message').innerText     = msg;
       document.getElementById('iconDisplay').innerText = icon;
 
-      const overlay = document.getElementById('dimOverlay');
-      if (tier === 'low') {
-        overlay.style.opacity = 1;
-      } else {
-        overlay.style.opacity = 0;
+      const dim = document.getElementById('dimOverlay');
+      if (score >= 50) {
         confetti({ particleCount: 150, spread: 60, origin: { y: 0.2 } });
+        dim.style.opacity = 0;
+      } else {
+        dim.style.opacity = 1;
       }
 
       stopAllSfx();
@@ -347,7 +428,6 @@
       audio.play();
 
       updateHistory({ name1: n1, name2: n2, score });
-
       document.getElementById('inputScreen').classList.add('hide');
       setTimeout(() => {
         document.getElementById('resultScreen').classList.remove('hide');
@@ -368,21 +448,21 @@
     }
 
     function stopAllSfx() {
-      ['audio-heartbreak','audio-love','audio-soulmate'].forEach(id => {
+      ['audio-hellnaw','audio-wtf','audio-yippee','audio-bestfriends'].forEach(id => {
         const a = document.getElementById(id);
         a.pause();
         a.currentTime = 0;
       });
     }
 
-    // Fade in screens on load
+    // INIT & NAVIGATION
     window.addEventListener('DOMContentLoaded', () => {
       const overlay = document.getElementById('fadeOverlay');
       setTimeout(() => { overlay.style.opacity = 0; }, 20);
       setTimeout(() => { document.body.classList.add('loaded'); }, 220);
+      document.getElementById('footerText').innerText = pickFooter();
     });
 
-    // Navigate to hatred.html
     document.getElementById('toHatred').addEventListener('click', () => {
       const overlay = document.getElementById('fadeOverlay');
       document.body.classList.remove('loaded');
